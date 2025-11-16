@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Script that displays information about DNS subdomains
+
+print_subdomain_info() {
+    sub=$1
+    domain=$2
+    result=$(dig "$sub.$domain" | grep -A1 "ANSWER SECTION:" | awk 'NR==2 {print $4, $5}')
+    record_type=$(echo "$result" | awk '{print $1}')
+    destination=$(echo "$result" | awk '{print $2}')
+    echo "The subdomain $sub is a $record_type record and points to $destination"
+}
+
+domain=$1
+subdomain=$2
+
+# If only domain is provided
+if [ -z "$subdomain" ]; then
+    for s in www lb-01 web-01 web-02
+    do
+        print_subdomain_info "$s" "$domain"
+    done
+else
+    print_subdomain_info "$subdomain" "$domain"
+fi
+
